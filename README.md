@@ -1,2 +1,2 @@
 # CVAviewer
-Cyclic Voltammetry Viewer
+Cyclic Voltammetry text files Viewer
