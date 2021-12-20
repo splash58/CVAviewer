@@ -13,7 +13,6 @@ from math import log10, floor
 
 class ProcessFile:
 
-
     @staticmethod
     def round_sig(x, sig=3):
         return round(x, sig - int(floor(log10(abs(x)))) - 1)
@@ -53,16 +52,10 @@ class ProcessFile:
         # up1 = up.sort_values('Potential (V)')
         # down1 = down.sort_values('Potential (V)')
 
-        #down = df[df['Current (A)'].le(0)]
-        #up = df[df['Current (A)'].ge(0)]
         iMin = df['Current (A)'].min()
         df['Current (A)'] -= df['Current (A)'].min()
         down = df[~df['Potential (V)'].diff().fillna(0).ge(0)].sort_values('Potential (V)')
         up = df[df['Potential (V)'].diff().fillna(0).ge(0)].sort_values('Potential (V)')
-
-        # plt.plot(up['Potential (V)'], up['Current (A)'], 'g')
-        # plt.plot(down['Potential (V)'], down['Current (A)'], 'o')
-        # plt.show()
 
         sup = simps(up['Current (A)']-minA, x=up['Potential (V)'])
         if math.isnan(sup):
@@ -73,7 +66,6 @@ class ProcessFile:
         
         square = (sup - sdown)
 
-        # print(f'{file} цикл={step} масса={m}г скорость={v}')
         C = square / ((df['Potential (V)'].max() - df['Potential (V)'].min()) * 2 * v * m)
         x = 0
         delta = (up.loc[(up['Potential (V)'] - x).abs().sort_values().head(3).index]['Current (A)'].mean() -
@@ -91,13 +83,11 @@ class ProcessFile:
         if not v:
             v = abs((df.iloc[-10]['Potential (V)'] - df.iloc[-20]['Potential (V)']) /
                     (df.iloc[-10]['Time (s)'] - df.iloc[-20]['Time (s)']))
-        # ax.legend(['Potential (V)'], loc='upper left')
-        # print('Расчет по ВАХ')
         if df['Potential (V)'].iloc[10] < 0:
             df['Potential (V)'] = - df['Potential (V)']
             df['Current (A)'] = - df['Current (A)']
         c, delta = self.vax(df, v, self.m)
-        columns = ['cycle', 'ΔV, V/s', 'C/m, F/g', 'ΔA(V=0),μA']
+        columns = ['cycle', 'ΔV,V/s', 'C/m,F/g', 'ΔA(V=0),μA']
         data = pd.DataFrame([[cycle, v, c, delta]], columns=columns)
         return data, columns
 
@@ -112,10 +102,6 @@ class ProcessFile:
         if cycle == 1:
             self.ax.set_xlabel('время (с)')
             self.ax.set_ylabel('напряжение (V)')
-
-        # if df['Potential (V)'].iloc[10] < 0:
-        #    df['Potential (V)'] = - df['Potential (V)']
-        #    df['Current (A)'] = - df['Current (A)']
 
         lst = df.index[df['Current (A)'] * df['Current (A)'].shift() < 0].tolist()
         lst = [0] + lst + [len(df)]
@@ -132,13 +118,12 @@ class ProcessFile:
             data.append([f'{cycle}.{cnt//2}', *self.uncharge(section.copy(), self.m)])
 
         columns = ['cycle',
-                   'C/m \\,F/g', 'C/m ∫,F/g',
-                   'E/m \\,Wh/g', 'P/m ∫,W/g',
-                   'E/m ∫,Wh/g', 'P/m ∫,W/g'
+                   'C/m\\,F/g', 'C/m∫,F/g',
+                   'E/m\\,Wh/g', 'P/m∫,W/g',
+                   'E/m∫,Wh/g', 'P/m∫,W/g'
                    ]
         data = pd.DataFrame(data, columns=columns)
         return data, columns
-
 
     def Ivv(self, cycle: int, df: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
         if cycle == 1:
@@ -153,9 +138,9 @@ class ProcessFile:
         self.ax.plot(df['Time (s)'], df['Potential (V)'], label=str(cycle))  # , 'g')
 
         columns = ['cycle',
-                   'C/m \\,F/g', 'C/m ∫,F/g',
-                   'E/m \\,Wh/g', 'P/m ∫,W/g',
-                   'E/m ∫,Wh/g', 'P/m ∫,W/g'
+                   'C/m\\,F/g', 'C/m∫,F/g',
+                   'E/m\\,Wh/g', 'P/m∫,W/g',
+                   'E/m∫,Wh/g', 'P/m∫,W/g'
                    ]
         if cycle % 2:
             data = pd.DataFrame(columns=columns)
@@ -175,8 +160,8 @@ class ProcessFile:
         self.m = m
         self.v = v
         self.ax = ax
+        self.constant = ''
 
-    #    print(f'{file} цикл={step} масса={m*1e3}мг скорость=', end='')
         plt.style.use('ggplot')
 
         for rec in parser(file):
@@ -188,6 +173,7 @@ class ProcessFile:
                 median = df['Current (A)'].abs().median()
                 s = ((df['Current (A)'].abs() - median).abs() < .1 * median).sum()
                 if s > .75 * len(df):
+                    self.constant = f', ток={round(median*1000, 3)} ma '
                     lst = df.index[df['Current (A)'] * df['Current (A)'].shift() < 0].tolist()
                     if lst:
                         factory = self.Ione
@@ -197,6 +183,7 @@ class ProcessFile:
                         print('пила')
                 else:
                     factory = self.VAT
+                    self.constant = ''
                     print('vax')
 
             cycle += 1
@@ -207,41 +194,14 @@ class ProcessFile:
             else:
                 # data = pd.DataFrame([data], columns=columns)
                 self.resFile = pd.concat([self.resFile, data], axis=0)
-        # print(resFile.round(10).to_string(index=False))
-
 
     def __str__(self):
         pd.set_option('display.max_columns', 500)
         pd.set_option('display.width', 1000)
         return self.resFile.round(10).to_string(index=False)
 
-"""
-        up, down = split(df)
-        # C = df['Current (A)'].abs()*df['Time (s)'].diff()/np.absolute(df['Potential (V)'].diff())
-
-        
-        if rt == 'VAX':
-            ax.plot(df['Potential (V)'], df['Current (A)'], label=str(cycle))   # , 'g')
-            ax.set_xlabel('напряжение (В)')
-            ax.set_ylabel('ток (А)')
-            # ax.legend(['Potential (V)'], loc='upper left')
-            # print('Расчет по ВАХ')
-            res = vax(v)
-            resFile = pd.concat([resFile, res], axis=0, sort=False)
-        elif rt == 'I':
-            # print('Расчет по току разряда')
-            ax.plot(df['Time (s)'], df['Potential (V)'], label=str(cycle))   # , 'g')
-            ax.set_xlabel('время (с)')
-            ax.set_ylabel('напряжение (В)')
-            # ax.legend(['Potential (V)'], loc='upper left')
-
-            res = current()
-            resFile = pd.concat([resFile, res], axis=0)
-            """
+    def result(self):
+        return self.resFile
 
 if __name__ == '__main__' :
-    fig, ax = plt.subplots()
-    print(ProcessFile(r'C:\Users\kazah\Downloads\700-1_100mVs.txt', 1, 0, ax))
-    # print(ProcessFile(r'C:\Users\kazah\Downloads\0017-3 100mVs_-800_800mV.txt', 1, 0, ax))
-    # print(ProcessFile(r'c:\Work\Алёна\31.01.20\01.txt ', 1, 0, ax))
-    # plt.show()
+    pass

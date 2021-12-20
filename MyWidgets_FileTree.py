@@ -82,7 +82,6 @@ class FileTree(tk.Frame):
             if os.path.isdir(abspath):
                 node = self.insert(parent, 'end', text=text, open=False, image=self.dir_image)
                 self.nodes[node] = abspath
-                #path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dir.png")
                 self.insert(node, 'end')
             else:
                 if text.endswith('.txt'):
@@ -95,8 +94,6 @@ class FileTree(tk.Frame):
             while parent:
                 level += 1
                 parent = self.parent(parent)
-
-            # bbox = self.bbox(directory)[2]
 
             abspath = self.nodes.pop(directory, None)
             if abspath:
@@ -183,6 +180,15 @@ class FileTree(tk.Frame):
             self.tree.load(path)
         else:
             self.tree.load()
+
+    def selected_dir(self):
+        path = self.tree.selection()
+        if path:
+            path = self.tree.path_to(path[0])
+            if not os.path.isdir(path):
+                path, _ = os.path.split(path)
+            return path
+
 
 
 if __name__ == "__main__":

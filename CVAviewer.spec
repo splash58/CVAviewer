@@ -4,7 +4,7 @@
 block_cipher = None
 
 
-a = Analysis(['preview.py'],
+a = Analysis(['CVAviewer.py'],
              pathex=[],
              binaries=[],
              datas=[('CVAviewer.png', '.')],
