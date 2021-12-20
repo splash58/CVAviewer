@@ -170,10 +170,10 @@ class ProcessFile:
 
             if not cycle:
                 # первый цикл - определяем тип файла
-                median = df['Current (A)'].abs().median()
-                s = ((df['Current (A)'].abs() - median).abs() < .1 * median).sum()
+                mean = df['Current (A)'].abs().mean()
+                s = ((df['Current (A)'].abs() - mean).abs() < .1 * mean).sum()
                 if s > .75 * len(df):
-                    self.constant = f', ток={round(median*1000, 3)} ma '
+                    self.constant = f', ток={round(mean*1000, 3)} ma '
                     lst = df.index[df['Current (A)'] * df['Current (A)'].shift() < 0].tolist()
                     if lst:
                         factory = self.Ione

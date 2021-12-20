@@ -108,7 +108,6 @@ class App(tk.Frame):
             if file.endswith('.txt'):
                 self.plot(os.path.join(path, file), False)
 
-
     def plot(self, file, clear=True):
         self.file = file
 
