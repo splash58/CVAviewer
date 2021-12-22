@@ -26,6 +26,8 @@ class MatplotTk(tk.Frame):
 
         toolbar = NavigationToolbar2Tk(self.canvas, self)
         toolbar.update()
+        toolbar.children['!button2'].pack_forget()
+        toolbar.children['!button3'].pack_forget()
         # self.canvas.draw()
 
     def plot(self, y, x=None):

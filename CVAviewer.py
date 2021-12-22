@@ -30,9 +30,9 @@ class App(tk.Frame):
 
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
-        #self.attributes('-fullscreen', True)
-        #self.columnconfigure(0, weight=1)
-        #self.rowconfigure(0, weight=1)
+        # self.attributes('-fullscreen', True)
+        # self.columnconfigure(0, weight=1)
+        # self.rowconfigure(0, weight=1)
 
         self.file = None
         self.mass = 1
@@ -53,12 +53,17 @@ class App(tk.Frame):
         rightFrame.grid(row=0, column=2, sticky='news')
 
         self._mass = tk.DoubleVar()
-        m_label = tk.Label(rightFrame, text="Масса, г:")
-        m_entry = tk.Entry(rightFrame, textvariable=self._mass)
+        m_label = ttk.Label(rightFrame, text="Масса, г:")
+        m_entry = ttk.Entry(rightFrame, textvariable=self._mass)
         self._mass.set(1)
         m_reculc = tk.Button(rightFrame, text="Пересчитать", command=self.reculc, padx=10, pady=3)
         all_dir = tk.Button(rightFrame, text="Всю папку", command=self.allDir, padx=10, pady=3)
-        save_result = tk.Button(rightFrame, text="Сохранить", command=self.save, padx=10, pady=3)
+        save_result = tk.Button(rightFrame, text="Сохранить", anchor="w", command=self.save, padx=10, pady=3, height=2)
+        onesheet = tk.BooleanVar()
+        onesheet.set(0)
+        tc = tk.Checkbutton(save_result, text="на один лист", variable=onesheet, onvalue=1, offvalue=0, padx=10, pady=3)
+        tc.pack(side=tk.RIGHT)
+
 
         m_label.grid(row=0, column=0, sticky='ew')
         m_entry.grid(row=0, column=1, sticky='ew')
@@ -139,10 +144,13 @@ class App(tk.Frame):
     def save(self):
         if not (hasattr(self, 'output') and self.output):
             return
+
+        t = tkinter.filedialog.SaveFileDialog(self.winfo_toplevel())
+
         file_name = tkinter.filedialog.asksaveasfilename(
             defaultextension=(("excell files", "*.xlsx"),),
             initialfile="Result.xlsx",
-            title="Сохранить файл с результатами",
+            title="Выберите файл",
         )
         if not file_name:
             return
