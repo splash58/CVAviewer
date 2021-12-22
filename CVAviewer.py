@@ -12,6 +12,28 @@ from process import ProcessFile
 import pandas as pd
 
 
+class ButtonWithCheck(tk.Button):
+
+    def __cmd(self):
+        self.__command(self.__onesheet.get())
+
+    def __init__(self, master, **kwargs):
+        self.__command = kwargs.get('command')
+
+        kwargs['command'] = self.__cmd
+        kwargs['text'] = "Сохранить"
+        kwargs['anchor'] = "w"
+        kwargs['padx'] = 10
+        kwargs['pady'] = 3
+        kwargs['height'] = 2
+        super().__init__(master, **kwargs)
+        self.__onesheet = tk.BooleanVar()
+        self.__onesheet.set(0)
+        tc = tk.Checkbutton(self, text="на один лист", variable=self.__onesheet, onvalue=1, offvalue=0, padx=10, pady=3)
+        tc.pack(side=tk.RIGHT)
+
+
+
 class App(tk.Frame):
 
     def reculc(self):
@@ -53,25 +75,19 @@ class App(tk.Frame):
         rightFrame.grid(row=0, column=2, sticky='news')
 
         self._mass = tk.DoubleVar()
-        m_label = ttk.Label(rightFrame, text="Масса, г:")
+        m_label = tk.Label(rightFrame, text="Масса, г:", anchor="e", padx=10)
         m_entry = ttk.Entry(rightFrame, textvariable=self._mass)
         self._mass.set(1)
         m_reculc = tk.Button(rightFrame, text="Пересчитать", command=self.reculc, padx=10, pady=3)
         all_dir = tk.Button(rightFrame, text="Всю папку", command=self.allDir, padx=10, pady=3)
-        save_result = tk.Button(rightFrame, text="Сохранить", anchor="w", command=self.save, padx=10, pady=3, height=2)
-        onesheet = tk.BooleanVar()
-        onesheet.set(0)
-        tc = tk.Checkbutton(save_result, text="на один лист", variable=onesheet, onvalue=1, offvalue=0, padx=10, pady=3)
-        tc.pack(side=tk.RIGHT)
 
-
+        save_result = ButtonWithCheck(rightFrame, command=self.save)
         m_label.grid(row=0, column=0, sticky='ew')
         m_entry.grid(row=0, column=1, sticky='ew')
         m_reculc.grid(row=1, column=0, columnspan=2, sticky='ew')
         all_dir.grid(row=2, column=0, columnspan=2, sticky='ew')
         save_result.grid(row=4, column=0, columnspan=2, sticky='ew')
 
-        # self.text = ScrolledText(rightFrame, width=40, wrap=tk.NONE)
         textFrame = tk.Frame(rightFrame)
         textFrame.grid(row=3, column=0, columnspan=2, sticky='news')
 
@@ -141,7 +157,7 @@ class App(tk.Frame):
         self.canvas.figure.tight_layout()
         self.canvas.canvas.draw()
 
-    def save(self):
+    def save(self, onesheet):
         if not (hasattr(self, 'output') and self.output):
             return
 

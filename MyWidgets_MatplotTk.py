@@ -10,7 +10,7 @@ matplotlib.use('TkAgg')
 class MatplotTk(tk.Frame):
 
     def __init__(self, master=None):
-        tk.Frame.__init__(self, master)
+        tk.Frame.__init__(self, master, background="gray")
         self.widget = None
         self.createWidgets()
 
@@ -21,6 +21,7 @@ class MatplotTk(tk.Frame):
         self.figure = Figure(figsize=(5, 5), dpi=100)
         # fig, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.figure, master=self)
+        self.bind('<Configure>', self.resize)
         self.widget = self.canvas.get_tk_widget()
         self.widget.pack(fill="both", expand=True)
 
@@ -37,8 +38,15 @@ class MatplotTk(tk.Frame):
             ax.plot(x, y, 'o-')
         else:
             ax.plot(y, 'o-')
+
+    def show(self):
+        self.figure.tight_layout()
         self.canvas.draw()
 
+    def resize(self, event):
+        w, h = event.width-100, event.height-100
+        self.widget.configure(width=w, height=h)
+        self.show()
 
 if __name__ == "__main__":
     pass
