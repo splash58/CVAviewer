@@ -4,8 +4,6 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as messagebox
 import tkinter.filedialog
-import ctypes
-import string
 from MyWidgets_FileTree import FileTree
 from MyWidgets_MatplotTk import MatplotTk
 from process import ProcessFile
@@ -73,25 +71,25 @@ class App(tk.Frame):
         fexplorer = FileTree(parent, self.plot)
         fexplorer.grid(row=0, column=0, sticky='news')
         self.fexplorer = fexplorer
-        # fexplorer.grid_columnconfigure(0, weight=1)
 
         self.canvas = MatplotTk(parent)
         self.canvas.grid(row=0, column=1, sticky='news')
         self.ax = None
 
-        rightFrame = tk.Frame(parent)                   # , bg='red')
+        rightFrame = tk.Frame(parent)
         rightFrame.grid(row=0, column=2, sticky='news')
 
         self._mass = tk.DoubleVar()
         m_label = tk.Label(rightFrame, text="Масса, г:", anchor="e", padx=10)
         m_entry = ttk.Entry(rightFrame, textvariable=self._mass)
         self._mass.set(1)
-        m_reculc = tk.Button(rightFrame, text="Пересчитать", command=self.reculc, padx=10, pady=3)
-        all_dir = tk.Button(rightFrame, text="Всю папку", command=self.allDir, padx=10, pady=3)
-
         m_label.grid(row=0, column=0, sticky='ew')
         m_entry.grid(row=0, column=1, sticky='ew')
+
+        m_reculc = tk.Button(rightFrame, text="Пересчитать", command=self.reculc, padx=10, pady=3)
         m_reculc.grid(row=1, column=0, columnspan=2, sticky='ew')
+
+        all_dir = tk.Button(rightFrame, text="Всю папку", command=self.allDir, padx=10, pady=3)
         all_dir.grid(row=2, column=0, columnspan=2, sticky='ew')
 
         textFrame = TextWithScroll(rightFrame)
@@ -204,6 +202,8 @@ if __name__ == '__main__':
     root = tk.Tk()
     App(root).grid()
     # root.resizable(False, False)
+    # root.attributes('-fullscreen', True)
+    root.state('zoomed')
     root.title('Cyclic Voltammetry Viewer .8.1')
 
     image = resource_path(r'CVAviewer.png')
