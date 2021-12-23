@@ -30,7 +30,7 @@ class FileTree(tk.Frame):
         """
 
         def __init__(self, master, callback, startpath=None, **kwargs):
-            super().__init__(master,  **kwargs)  # show="tree",
+            super().__init__(master, show="tree", **kwargs)
             self.callback = callback
             self.column("#0", minwidth=10,  stretch=True)
             self.load(startpath)
@@ -163,15 +163,22 @@ class FileTree(tk.Frame):
         self.config(height=40, width=40)
         tree = self.FileExplorer(self, callback, startpath, selectmode="browse")
         self.tree = tree
-        ysb = ttk.Scrollbar(self, orient='vertical', command=tree.yview)
-        xsb = ttk.Scrollbar(self, orient='horizontal', command=tree.xview)
+        tree.grid(row=0, column=0, sticky='news')
 
-        tree.configure(yscroll=ysb.set, xscroll=xsb.set)
-        tree.heading('#0', text='<перегрузить>',  anchor='w', command=self.reload)
+        xscrollbar = tk.Scrollbar(self, orient='horizontal', command=tree.xview)
+        xscrollbar.grid(row=1, column=0, sticky='we')
 
-        ysb.pack(side='right', fill='y')
-        xsb.pack(side='bottom', fill='x')
-        tree.pack(fill="both", expand=True)
+        yscrollbar = tk.Scrollbar(self, orient='vertical', command=tree.yview)
+        yscrollbar.grid(row=0, column=1, sticky='ns')
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        bt = tk.Button(self, text='Перегрузить', command=self.reload, height=2, padx=10, pady=3)
+        bt.grid(row=2, column=0, columnspan=2, sticky='we')
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
     def reload(self):
         path = self.tree.selection()

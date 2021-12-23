@@ -28,27 +28,34 @@ class ButtonWithCheck(tk.Button):
         kwargs['height'] = 2
         super().__init__(master, **kwargs)
         self.__onesheet = tk.BooleanVar()
-        self.__onesheet.set(0)
+        self.__onesheet.set(1)
         tc = tk.Checkbutton(self, text="на один лист", variable=self.__onesheet, onvalue=1, offvalue=0, padx=10, pady=3)
         tc.pack(side=tk.RIGHT)
 
 
+class TextWithScroll(tk.Frame):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+
+        xscrollbar = tk.Scrollbar(self, orient=tk.HORIZONTAL)
+        xscrollbar.grid(row=1, column=0, sticky='we')
+
+        yscrollbar = tk.Scrollbar(self)
+        yscrollbar.grid(row=0, column=1, sticky='ns')
+
+        self.text = tk.Text(self, wrap=tk.NONE,
+                            width=40,
+                            xscrollcommand=xscrollbar.set,
+                            yscrollcommand=yscrollbar.set)
+        self.text.grid(row=0, column=0, sticky='news')
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        xscrollbar.config(command=self.text.xview)
+        yscrollbar.config(command=self.text.yview)
+
 
 class App(tk.Frame):
-
-    def reculc(self):
-        if self.file is None:
-            return
-        try:
-            m = float(self._mass.get())
-        except:
-            messagebox.showwarning(title='Неверно указана масса',
-                                   message='Поле масса должно содержать число с десятичной точкой')
-            return
-
-        self.mass = m
-        self.plot(self.file)
-
 
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
@@ -57,6 +64,7 @@ class App(tk.Frame):
         # self.rowconfigure(0, weight=1)
 
         self.file = None
+        self.output = dict()
         self.mass = 1
         width = int(.8 * self.winfo_screenwidth())  # get your Windows width size
         height = int(.8 * self.winfo_screenheight())  # get your Windows height size
@@ -81,32 +89,17 @@ class App(tk.Frame):
         m_reculc = tk.Button(rightFrame, text="Пересчитать", command=self.reculc, padx=10, pady=3)
         all_dir = tk.Button(rightFrame, text="Всю папку", command=self.allDir, padx=10, pady=3)
 
-        save_result = ButtonWithCheck(rightFrame, command=self.save)
         m_label.grid(row=0, column=0, sticky='ew')
         m_entry.grid(row=0, column=1, sticky='ew')
         m_reculc.grid(row=1, column=0, columnspan=2, sticky='ew')
         all_dir.grid(row=2, column=0, columnspan=2, sticky='ew')
+
+        textFrame = TextWithScroll(rightFrame)
+        self.text = textFrame.text
+        textFrame.grid(row=3, column=0,columnspan=2, sticky='news')
+
+        save_result = ButtonWithCheck(rightFrame, command=self.save)
         save_result.grid(row=4, column=0, columnspan=2, sticky='ew')
-
-        textFrame = tk.Frame(rightFrame)
-        textFrame.grid(row=3, column=0, columnspan=2, sticky='news')
-
-        xscrollbar = tk.Scrollbar(textFrame, orient=tk.HORIZONTAL)
-        xscrollbar.grid(row=1, column=0, sticky='we')
-
-        yscrollbar = tk.Scrollbar(textFrame)
-        yscrollbar.grid(row=0, column=1, sticky='ns')
-
-        self.text = tk.Text(textFrame, wrap=tk.NONE,
-                            width=40,
-                    xscrollcommand=xscrollbar.set,
-                    yscrollcommand=yscrollbar.set)
-        self.text.grid(row=0, column=0, sticky='news')
-        textFrame.grid_rowconfigure(0, weight=1)
-        textFrame.grid_columnconfigure(0, weight=1)
-
-        xscrollbar.config(command=self.text.xview)
-        yscrollbar.config(command=self.text.yview)
 
         rightFrame.grid_rowconfigure(3, weight=1)
         rightFrame.grid_columnconfigure(0, weight=1)
@@ -128,6 +121,19 @@ class App(tk.Frame):
         for file in listdir:
             if file.endswith('.txt'):
                 self.plot(os.path.join(path, file), False)
+
+    def reculc(self):
+        if self.file is None:
+            return
+        try:
+            m = float(self._mass.get())
+        except:
+            messagebox.showwarning(title='Неверно указана масса',
+                                   message='Поле масса должно содержать число с десятичной точкой')
+            return
+
+        self.mass = m
+        self.plot(self.file)
 
     def plot(self, file, clear=True):
         self.file = file
@@ -152,16 +158,12 @@ class App(tk.Frame):
         except:
             self.text.insert(at, 'Неизвестный тип файла')
 
-        #self.canvas.plot(list(map(lambda i: i*cnt, y)), list(map(lambda i: i*cnt, x)))
         self.ax.legend()
-        self.canvas.figure.tight_layout()
-        self.canvas.canvas.draw()
+        self.canvas.show()
 
     def save(self, onesheet):
         if not (hasattr(self, 'output') and self.output):
             return
-
-        t = tkinter.filedialog.SaveFileDialog(self.winfo_toplevel())
 
         file_name = tkinter.filedialog.asksaveasfilename(
             defaultextension=(("excell files", "*.xlsx"),),
@@ -170,11 +172,20 @@ class App(tk.Frame):
         )
         if not file_name:
             return
-        writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
-        for sheet, dataframe in self.output.items():
-            _, file = os.path.split(sheet.split(',')[0])
-            dataframe.set_index('cycle').to_excel(writer, sheet_name=file, startrow=2, startcol=0)
-            writer.sheets[file].write(0, 0, sheet)
+        writer = pd.ExcelWriter(file_name, engine='xlsxwriter', mode='w')
+        if onesheet:
+            #worksheet = writer.book.add_worksheet('results')
+            row = 0
+            for sheet, dataframe in self.output.items():
+                _, file = os.path.split(sheet.split(',')[0])
+                dataframe.set_index('cycle').to_excel(writer, sheet_name='results', startrow=row+2, startcol=0)
+                writer.sheets['results'].write(row, 0, sheet)
+                row += len(dataframe) + 5
+        else:
+            for sheet, dataframe in self.output.items():
+                _, file = os.path.split(sheet.split(',')[0])
+                dataframe.set_index('cycle').to_excel(writer, sheet_name=file, startrow=2, startcol=0)
+                writer.sheets[file].write(0, 0, sheet)
         writer.save()
 
 
