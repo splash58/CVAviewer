@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import font
 
+
 class ExampleApp(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -26,7 +27,7 @@ class ExampleApp(tk.Tk):
 
 
 class SimpleTable(tk.Frame):
-    def __init__(self, parent, rows=10, columns=7, fill_cell= None):
+    def __init__(self, parent, rows=10, columns=7, fill_cell=None):
         # use black background so it "peeks through" to 
         # form grid lines
         tk.Frame.__init__(self, parent, background="black")

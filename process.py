@@ -119,7 +119,7 @@ class ProcessFile:
 
         columns = ['cycle',
                    'C/m\\,F/g', 'C/m∫,F/g',
-                   'E/m\\,Wh/g', 'P/m∫,W/g',
+                   'E/m\\,Wh/g', 'P/m\\,W/g',
                    'E/m∫,Wh/g', 'P/m∫,W/g'
                    ]
         data = pd.DataFrame(data, columns=columns)
@@ -139,7 +139,7 @@ class ProcessFile:
 
         columns = ['cycle',
                    'C/m\\,F/g', 'C/m∫,F/g',
-                   'E/m\\,Wh/g', 'P/m∫,W/g',
+                   'E/m\\,Wh/g', 'P/m\\,W/g',
                    'E/m∫,Wh/g', 'P/m∫,W/g'
                    ]
         if cycle % 2:

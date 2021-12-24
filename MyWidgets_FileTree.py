@@ -174,7 +174,7 @@ class FileTree(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        bt = tk.Button(self, text='Перегрузить', command=self.reload, height=2, padx=10, pady=3)
+        bt = tk.Button(self, text='Перегрузить', command=self.reload, height=2, padx=10, pady=0)
         bt.grid(row=2, column=0, columnspan=2, sticky='we')
 
         self.grid_rowconfigure(0, weight=1)

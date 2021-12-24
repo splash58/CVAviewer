@@ -157,6 +157,7 @@ class App(tk.Frame):
             self.text.insert(at, 'Неизвестный тип файла')
 
         self.ax.legend()
+        self.ax.set_title(title, fontsize="medium")
         self.canvas.show()
 
     def save(self, onesheet):
