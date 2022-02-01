@@ -94,7 +94,7 @@ class App(tk.Frame):
 
         textFrame = TextWithScroll(rightFrame)
         self.text = textFrame.text
-        textFrame.grid(row=3, column=0,columnspan=2, sticky='news')
+        textFrame.grid(row=3, column=0, columnspan=2, sticky='news')
 
         save_result = ButtonWithCheck(rightFrame, command=self.save)
         save_result.grid(row=4, column=0, columnspan=2, sticky='ew')
@@ -153,11 +153,11 @@ class App(tk.Frame):
             title = f'{file}, масса = {self.mass} g{constant}'
             self.text.insert(at, f'{title}\n{process}\n')
             self.output[title] = process.resFile
+            self.ax.set_title(title, fontsize="medium")
         except:
             self.text.insert(at, 'Неизвестный тип файла')
 
         self.ax.legend()
-        self.ax.set_title(title, fontsize="medium")
         self.canvas.show()
 
     def save(self, onesheet):
@@ -173,7 +173,7 @@ class App(tk.Frame):
             return
         writer = pd.ExcelWriter(file_name, engine='xlsxwriter', mode='w')
         if onesheet:
-            #worksheet = writer.book.add_worksheet('results')
+            # worksheet = writer.book.add_worksheet('results')
             row = 0
             for sheet, dataframe in self.output.items():
                 _, file = os.path.split(sheet.split(',')[0])
